@@ -12,7 +12,10 @@ export default function App() {
   const [destination, setDestination] = useState(null);
   const [distance, setDistance] = useState(null);
   const [locationText, setLocationText] = useState("unknown");
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState({
+    latitude: 43.659636641869696,
+    longitude: -79.39688924470802,
+  });
   const [arrived, setArrived] = useState(null);
   const [subscription, setSubscription] = useState(null);
   const [cheating, setCheating] = useState(false);
