@@ -12,8 +12,8 @@ const Direction = (props) => {
     if (location != null && destination != null) {
       const newDirection = geolib.getCompassDirection(
         {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
+          latitude: location.latitude,
+          longitude: location.longitude,
         },
         { latitude: destination.latitude, longitude: destination.longitude }
       );

@@ -16,8 +16,8 @@ const MainMap = (props) => {
   useEffect(() => {
     if (location != null) {
       setRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
+        latitude: location.latitude,
+        longitude: location.longitude,
         latitudeDelta: 0.005,
         longitudeDelta: 0.005,
       });

@@ -12,7 +12,7 @@ const HintBox = (props) => {
         <Text>Welcome to {destination.name}!</Text>
       </View>
     );
-  } else {
+  } else if (destination != null) {
     return (
       <View>
         <Distance distance={distance} />
@@ -23,6 +23,8 @@ const HintBox = (props) => {
         />
       </View>
     );
+  } else {
+    return <Text>Choose a destination!</Text>;
   }
 };
 

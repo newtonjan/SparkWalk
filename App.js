@@ -13,6 +13,7 @@ export default function App() {
   const [arrived, setArrived] = useState(null);
   const [subscription, setSubscription] = useState(null);
   const [locationText, setLocationText] = useState("unknown");
+  const [cheating, setCheating] = useState(false);
 
   // Get permission and watch location
   useEffect(() => {
@@ -22,7 +23,8 @@ export default function App() {
         setErrorMsg("Permission to access location was denied");
         return;
       } else {
-        await watchPosition();
+        const newSubscription = await watchPosition();
+        setSubscription(newSubscription);
       }
     };
     getPermission();
@@ -46,66 +48,72 @@ export default function App() {
       const dis = geolib.getPreciseDistance(
         { latitude: destination.latitude, longitude: destination.longitude },
         {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
+          latitude: location.latitude,
+          longitude: location.longitude,
         }
       );
 
       // Update distance
       setDistance(dis);
     }
-  }, [location, destination]);
+  }, [location, destination, cheating]);
 
   // Subscribe to position updates
   const watchPosition = async () => {
-    const subscriptionID = await Location.watchPositionAsync(
+    const newSubscription = await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.High,
         timeInterval: 5000,
         distanceInterval: 0,
       },
       (location) => {
-        updateLocation(location);
-        setSubscription(subscriptionID);
+        updateLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
       }
     );
+    return newSubscription;
   };
 
   // Set location and location text
   const updateLocation = (newLocation) => {
     setLocation(newLocation);
     setLocationText(
-      `(${newLocation.coords.latitude.toFixed(
+      `(${newLocation.latitude.toFixed(4)}, ${newLocation.longitude.toFixed(
         4
-      )}, ${newLocation.coords.longitude.toFixed(4)})`
+      )})`
     );
   };
 
   // Set destination
   const setDest = (newDestination) => {
+    setCheating(false);
     setDestination(newDestination);
-    watchPosition();
   };
 
   // Turn on cheat mode
-  const cheatMode = async () => {
+  const cheatMode = () => {
     if (destination != null) {
+      setCheating(true);
+
       // Unsubscribe from position updates
-      await subscription.remove();
+      subscription.remove();
 
       // Spoof location
-      const newLocation = location;
-      newLocation.coords.latitude = destination.latitude;
-      newLocation.coords.longitude = destination.longitude;
-      updateLocation(newLocation);
-      setArrived(true);
+      updateLocation({
+        latitude: destination.latitude,
+        longitude: destination.longitude,
+      });
+
+      // setArrived(true);
     }
   };
 
   return (
     <View style={styles.container}>
       <DestinationList setDest={setDest} />
-      <MainMap location={location} />
+      <MainMap location={cheating ? destination : location} />
       <Text>Current location is {locationText}</Text>
       <HintBox
         destination={destination}
