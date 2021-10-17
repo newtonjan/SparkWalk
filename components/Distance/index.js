@@ -17,7 +17,7 @@ const Distance = (props) => {
 
   return (
     <View>
-      <Text>You're about {walkingTime} minutes away!</Text>
+      <Text style={styles.distance}>~{walkingTime} min</Text>
     </View>
   );
 };

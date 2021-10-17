@@ -22,8 +22,9 @@ const Direction = (props) => {
   }, [distance, location, destination]);
 
   return (
-    <View>
-      <Text>Direction: {direction}</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Head in Direction:</Text>
+      <Text style={styles.direction}>{direction}</Text>
     </View>
   );
 };

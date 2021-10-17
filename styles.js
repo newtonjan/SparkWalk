@@ -2,20 +2,19 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    bottom: 50,
-    width: "80%",
+    backgroundColor: "#43AA8B",
+    width: "100%",
+    height: "100%",
     alignItems: "center",
+    justifyContent: "center",
+  },
+
+  cheatButton: {
     position: "absolute",
-  },
-  prompt: {
-    color: "#fff",
-    fontSize: 30,
-    textAlign: "center",
-    marginBottom: 15,
-  },
-  button: {
-    width: 200,
-    height: 40,
+    top: 600,
+    backgroundColor: "#F94144",
+    width: 80,
+    height: 30,
     marginVertical: 10,
     color: "#fff",
     marginVertical: 5,
@@ -23,9 +22,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 5,
   },
-  buttonText: {
+  cheatText: {
     color: "#fff",
-    fontSize: 20,
   },
 });
 

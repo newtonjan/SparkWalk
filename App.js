@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, Button } from "react-native";
+import { Text, View, Button, TouchableOpacity } from "react-native";
 import * as Location from "expo-location";
 import * as geolib from "geolib";
 import DestinationList from "./components/DestinationList/";
 import MainMap from "./components/MainMap/";
 import HintBox from "./components/HintBox/";
+import Header from "./components/Header";
+import styles from "./styles.js";
 
 export default function App() {
   const [destination, setDestination] = useState(null);
   const [distance, setDistance] = useState(null);
+  const [locationText, setLocationText] = useState("unknown");
   const [location, setLocation] = useState(null);
   const [arrived, setArrived] = useState(null);
   const [subscription, setSubscription] = useState(null);
-  const [locationText, setLocationText] = useState("unknown");
   const [cheating, setCheating] = useState(false);
 
   // Get permission and watch location
@@ -105,31 +107,31 @@ export default function App() {
         latitude: destination.latitude,
         longitude: destination.longitude,
       });
-
-      // setArrived(true);
     }
   };
 
   return (
     <View style={styles.container}>
-      <DestinationList setDest={setDest} />
-      <MainMap location={cheating ? destination : location} />
-      <Text>Current location is {locationText}</Text>
+      <Header />
+
+      <MainMap
+        location={cheating ? destination : location}
+        locationText={locationText}
+      />
       <HintBox
         destination={destination}
         location={location}
         distance={distance}
         arrived={arrived}
       />
-      <Button title="Cheat" onPress={cheatMode} />
+      {arrived ? (
+        <Text>""</Text>
+      ) : (
+        <TouchableOpacity onPress={cheatMode} style={styles.cheatButton}>
+          <Text style={styles.cheatText}>Cheat</Text>
+        </TouchableOpacity>
+      )}
+      <DestinationList setDest={setDest} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

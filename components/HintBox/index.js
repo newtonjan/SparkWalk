@@ -8,23 +8,28 @@ const HintBox = (props) => {
 
   if (arrived) {
     return (
-      <View>
-        <Text>Welcome to {destination.name}!</Text>
+      <View style={styles.welcomeContainer}>
+        <Text style={styles.welcome}>Welcome to </Text>
+        <Text style={styles.arrived}>{destination.name}!</Text>
       </View>
     );
   } else if (destination != null) {
     return (
-      <View>
-        <Distance distance={distance} />
+      <View style={styles.hintsContainer}>
         <Direction
           destination={destination}
           location={location}
           distance={distance}
         />
+        <Distance distance={distance} />
       </View>
     );
   } else {
-    return <Text>Choose a destination!</Text>;
+    return (
+      <View style={styles.container}>
+        <Text style={styles.choose}>No destination selected</Text>
+      </View>
+    );
   }
 };
 
