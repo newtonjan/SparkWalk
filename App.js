@@ -1,31 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TextInput, Button } from "react-native";
-import MapView from "react-native-maps";
 import * as Location from "expo-location";
 import * as geolib from "geolib";
+import DestinationList from "./components/DestinationList/";
+import MainMap from "./components/MainMap/";
+import Direction from "./components/Direction/";
+import Distance from "./components/Distance/";
 
 export default function App() {
-  const destinations = [
-    {
-      latitude: 43.64252041015123,
-      longitude: -79.46687609655802,
-      name: "High Park",
-      description: "See some trees",
-    },
-    {
-      latitude: 43.66445135945543,
-      longitude: -79.39942208809704,
-      name: "Robarts Library",
-      description: "Stay up all night",
-    },
-    {
-      latitude: 43.67799144407594,
-      longitude: -79.409750566712,
-      name: "Casa Loma",
-      description: "Fancy house",
-    },
-  ];
-  const [destination, setDestination] = useState(destinations[0]);
+  const [destination, setDestination] = useState(null);
   const [distance, setDistance] = useState(null);
   const [location, setLocation] = useState(null);
   const [arrived, setArrived] = useState(null);
@@ -37,9 +20,8 @@ export default function App() {
   });
   const [subscription, setSubscription] = useState(null);
 
-  const [distanceText, setDistanceText] = useState("unknown");
   const [locationText, setLocationText] = useState("unknown");
-  const [direction, setDirection] = useState("unknown");
+  const [cheating, setCheating] = useState(false);
 
   // Get permission and watch location
   useEffect(() => {
@@ -54,6 +36,29 @@ export default function App() {
     };
     getPermission();
   }, []);
+
+  // Update map region when location changes
+  useEffect(() => {
+    if (location != null) {
+      setRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    }
+  }, [location]);
+
+  // Check if arrived when location, distance, or destination change
+  useEffect(() => {
+    if (distance != null && location != null && destination != null) {
+      if (distance < 50) {
+        setArrived(true);
+      } else {
+        setArrived(false);
+      }
+    }
+  }, [location, distance, destination]);
 
   // Subscribe to position updates
   const watchPosition = async () => {
@@ -80,99 +85,58 @@ export default function App() {
     );
   };
 
-  // Update map region
-  useEffect(() => {
-    if (location != null) {
-      setRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      });
-    }
-  }, [location]);
-
-  // Determine distance from destination
-  useEffect(() => {
-    if (location != null) {
-      const dis = geolib.getPreciseDistance(
-        { latitude: destination.latitude, longitude: destination.longitude },
-        {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        }
-      );
-      setDistance(dis);
-      setDistanceText(`${dis}m`);
-    }
-  }, [location, destination]);
-
-  // If near destination, reward user
-  useEffect(() => {
-    if (distance != null) {
-      if (distance < 50) {
-        setArrived(true);
-      } else {
-        setArrived(false);
-      }
-    }
-  }, [location, distance, destination]);
+  const updateDistance = (newDistance) => {
+    setDistance(newDistance);
+  };
 
   // Set destination
-  const setDest = (destNum) => {
-    setDestination(destinations[destNum]);
+  const setDest = (newDestination) => {
+    setDestination(newDestination);
     watchPosition();
   };
 
-  // Set compass direction
-  useEffect(() => {
-    if (location != null) {
-      const newDirection = geolib.getCompassDirection(
-        {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        },
-        { latitude: destination.latitude, longitude: destination.longitude }
-      );
-      setDirection(newDirection);
-    }
-  }, [distance]);
-
   // Turn on cheat mode
   const cheatMode = async () => {
-    await subscription.remove();
-    const newLocation = location;
-    newLocation.coords.latitude = destination.latitude;
-    newLocation.coords.longitude = destination.longitude;
+    if (destination != null) {
+      // Unsubscribe from position updates
+      await subscription.remove();
 
-    updateLocation(newLocation);
-    setRegion({
-      latitude: destination.latitude,
-      longitude: destination.longitude,
-      latitudeDelta: 0.005,
-      longitudeDelta: 0.005,
-    });
+      // Spoof location
+      const newLocation = location;
+      newLocation.coords.latitude = destination.latitude;
+      newLocation.coords.longitude = destination.longitude;
+      updateLocation(newLocation);
 
-    setDistance(0);
-    setDistanceText("0m");
+      // Update map and distance
+      setRegion({
+        latitude: destination.latitude,
+        longitude: destination.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+
+      setDistance(0);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text> Choose a mystery destination: </Text>
-      <Button title={destinations[0].description} onPress={() => setDest(0)} />
-      <Button title={destinations[1].description} onPress={() => setDest(1)} />
-      <Button title={destinations[2].description} onPress={() => setDest(2)} />
-
-      <MapView
-        showsUserLocation={true}
-        style={styles.map}
-        provider={MapView.PROVIDER_GOOGLE}
-        region={region}
-      />
+      <DestinationList setDest={setDest} />
+      <MainMap region={region} />
       <Text>Current location is {locationText}</Text>
-      <Text>Distance from destination is {distanceText} </Text>
-      <Text>{arrived ? "" : `Direction: ${direction}`}</Text>
+
+      <Distance
+        location={location}
+        destination={destination}
+        distance={distance}
+        updateDistanceHandler={updateDistance}
+      />
+      <Direction
+        destination={destination}
+        location={location}
+        distance={distance}
+      />
+
       <Text>{arrived ? `Welcome to ${destination.name}!` : ""}</Text>
       <Button title="Cheat" onPress={cheatMode} />
     </View>
@@ -184,10 +148,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-  },
-
-  map: {
-    width: "60%",
-    height: "40%",
   },
 });
