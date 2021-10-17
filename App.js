@@ -118,20 +118,20 @@ export default function App() {
         location={cheating ? destination : location}
         locationText={locationText}
       />
-      <HintBox
-        destination={destination}
-        location={location}
-        distance={distance}
-        arrived={arrived}
-      />
-      {arrived ? (
-        <Text>""</Text>
-      ) : (
-        <TouchableOpacity onPress={cheatMode} style={styles.cheatButton}>
-          <Text style={styles.cheatText}>Cheat</Text>
-        </TouchableOpacity>
-      )}
-      <DestinationList setDest={setDest} />
+      <View style={styles.underMap}>
+        <HintBox
+          destination={destination}
+          location={location}
+          distance={distance}
+          arrived={arrived}
+        />
+        {!arrived && (
+          <TouchableOpacity onPress={cheatMode} style={styles.cheatButton}>
+            <Text style={styles.cheatText}>Cheat</Text>
+          </TouchableOpacity>
+        )}
+        <DestinationList setDest={setDest} />
+      </View>
     </View>
   );
 }

@@ -2,13 +2,12 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   card: {
-    position: "absolute",
-    top: 150,
     width: "80%",
     height: "40%",
     backgroundColor: "#F5C151",
     padding: 10,
     borderRadius: 8,
+    marginTop: 10,
   },
 
   map: {

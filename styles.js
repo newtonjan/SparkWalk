@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
@@ -6,12 +6,14 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
+  },
+  underMap: {
+    alignItems: "center",
+    justifyContent: "flex-start",
   },
 
   cheatButton: {
-    position: "absolute",
-    top: 600,
     backgroundColor: "#F94144",
     width: 80,
     height: 30,

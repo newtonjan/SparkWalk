@@ -2,10 +2,8 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    bottom: 50,
-    width: "80%",
     alignItems: "center",
-    position: "absolute",
+    justifyContent: "center",
   },
   prompt: {
     color: "#fff",

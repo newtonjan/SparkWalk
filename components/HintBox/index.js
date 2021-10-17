@@ -26,7 +26,7 @@ const HintBox = (props) => {
     );
   } else {
     return (
-      <View style={styles.container}>
+      <View style={styles.welcomeContainer}>
         <Text style={styles.choose}>No destination selected</Text>
       </View>
     );
