@@ -39,6 +39,7 @@ export default function App() {
 
   const [distanceText, setDistanceText] = useState("unknown");
   const [locationText, setLocationText] = useState("unknown");
+  const [direction, setDirection] = useState("unknown");
 
   // Get permission and watch location
   useEffect(() => {
@@ -69,6 +70,7 @@ export default function App() {
     );
   };
 
+  // Set location and location text
   const updateLocation = (newLocation) => {
     setLocation(newLocation);
     setLocationText(
@@ -114,16 +116,31 @@ export default function App() {
         setArrived(false);
       }
     }
-  }, [location, distance]);
+  }, [location, distance, destination]);
 
   // Set destination
   const setDest = (destNum) => {
     setDestination(destinations[destNum]);
+    watchPosition();
   };
 
+  // Set compass direction
+  useEffect(() => {
+    if (location != null) {
+      const newDirection = geolib.getCompassDirection(
+        {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        },
+        { latitude: destination.latitude, longitude: destination.longitude }
+      );
+      setDirection(newDirection);
+    }
+  }, [distance]);
+
   // Turn on cheat mode
-  const cheatMode = () => {
-    subscription.remove();
+  const cheatMode = async () => {
+    await subscription.remove();
     const newLocation = location;
     newLocation.coords.latitude = destination.latitude;
     newLocation.coords.longitude = destination.longitude;
@@ -155,8 +172,9 @@ export default function App() {
       />
       <Text>Current location is {locationText}</Text>
       <Text>Distance from destination is {distanceText} </Text>
-      <Text>{arrived ? "You made it!" : "Keep going!"}</Text>
-      <Button title="Take me closer, I don't wanna walk" onPress={cheatMode} />
+      <Text>{arrived ? "" : `Direction: ${direction}`}</Text>
+      <Text>{arrived ? `Welcome to ${destination.name}!` : ""}</Text>
+      <Button title="Cheat" onPress={cheatMode} />
     </View>
   );
 }
