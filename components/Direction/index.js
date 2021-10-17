@@ -7,7 +7,7 @@ const Direction = (props) => {
   const [direction, setDirection] = useState("unknown");
   const { destination, location, distance } = props;
 
-  // Set compass direction when distance changes
+  // Set compass direction when distance, location, or destination change
   useEffect(() => {
     if (location != null && destination != null) {
       const newDirection = geolib.getCompassDirection(
@@ -19,7 +19,7 @@ const Direction = (props) => {
       );
       setDirection(newDirection);
     }
-  }, [distance]);
+  }, [distance, location, destination]);
 
   return (
     <View>

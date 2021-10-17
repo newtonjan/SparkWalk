@@ -4,24 +4,15 @@ import * as Location from "expo-location";
 import * as geolib from "geolib";
 import DestinationList from "./components/DestinationList/";
 import MainMap from "./components/MainMap/";
-import Direction from "./components/Direction/";
-import Distance from "./components/Distance/";
+import HintBox from "./components/HintBox/";
 
 export default function App() {
   const [destination, setDestination] = useState(null);
   const [distance, setDistance] = useState(null);
   const [location, setLocation] = useState(null);
   const [arrived, setArrived] = useState(null);
-  const [region, setRegion] = useState({
-    latitude: 43.66872,
-    longitude: -79.39516,
-    latitudeDelta: 0.005,
-    longitudeDelta: 0.005,
-  });
   const [subscription, setSubscription] = useState(null);
-
   const [locationText, setLocationText] = useState("unknown");
-  const [cheating, setCheating] = useState(false);
 
   // Get permission and watch location
   useEffect(() => {
@@ -37,18 +28,6 @@ export default function App() {
     getPermission();
   }, []);
 
-  // Update map region when location changes
-  useEffect(() => {
-    if (location != null) {
-      setRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      });
-    }
-  }, [location]);
-
   // Check if arrived when location, distance, or destination change
   useEffect(() => {
     if (distance != null && location != null && destination != null) {
@@ -59,6 +38,23 @@ export default function App() {
       }
     }
   }, [location, distance, destination]);
+
+  // Update distance from destination when location or destination change
+  useEffect(() => {
+    if (location != null && destination != null) {
+      // Calculate distance
+      const dis = geolib.getPreciseDistance(
+        { latitude: destination.latitude, longitude: destination.longitude },
+        {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        }
+      );
+
+      // Update distance
+      setDistance(dis);
+    }
+  }, [location, destination]);
 
   // Subscribe to position updates
   const watchPosition = async () => {
@@ -85,10 +81,6 @@ export default function App() {
     );
   };
 
-  const updateDistance = (newDistance) => {
-    setDistance(newDistance);
-  };
-
   // Set destination
   const setDest = (newDestination) => {
     setDestination(newDestination);
@@ -106,38 +98,21 @@ export default function App() {
       newLocation.coords.latitude = destination.latitude;
       newLocation.coords.longitude = destination.longitude;
       updateLocation(newLocation);
-
-      // Update map and distance
-      setRegion({
-        latitude: destination.latitude,
-        longitude: destination.longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      });
-
-      setDistance(0);
+      setArrived(true);
     }
   };
 
   return (
     <View style={styles.container}>
       <DestinationList setDest={setDest} />
-      <MainMap region={region} />
+      <MainMap location={location} />
       <Text>Current location is {locationText}</Text>
-
-      <Distance
-        location={location}
-        destination={destination}
-        distance={distance}
-        updateDistanceHandler={updateDistance}
-      />
-      <Direction
+      <HintBox
         destination={destination}
         location={location}
         distance={distance}
+        arrived={arrived}
       />
-
-      <Text>{arrived ? `Welcome to ${destination.name}!` : ""}</Text>
       <Button title="Cheat" onPress={cheatMode} />
     </View>
   );
